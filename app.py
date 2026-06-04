@@ -20,6 +20,7 @@ data = pd.read_csv('chemical_reactions.csv')
 X = data[['temperature (Kel)', 'pressure (atm)', "concentration (mol/L)", 'catalyst_type']]
 y = data['success']
 
+# The endpoint to add a new chemical reaction to the csv file to retrain the model
 @app.route("/add_reaction", methods=['POST'])
 def add_reaction():
 
@@ -53,6 +54,7 @@ def add_reaction():
 
     return jsonify({"message": "Reaction added successfully", "CHEM_ID": new_id_str})
 
+# The endpoint to retarin the model
 @app.route("/retrain", methods=['POST'])
 def retrain():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -84,7 +86,7 @@ def retrain():
     return jsonify({ "metrics" : metrics, "confusion" : cm, "prcurve" : pr_curve })
 
 
-
+# load the model results from json file
 with open("model_results.json") as f:
     results = json.load(f)
 
@@ -102,18 +104,24 @@ with open("model_results.json") as f:
 #     "recall": [0.1, 0.5, 0.9]
 # }
 
-
+# the endpoint to get the model metrics, confusion matrix and pr-curve data
 @app.route("/metrics", methods=['GET'])
 def get_metrics():
     return jsonify(results['metrics'])
+
+# the endpoint to get the confusion matrix and pr-curve data
 
 @app.route("/confusion", methods=['GET'])
 def get_confusion():
     return jsonify(results['confusion'])
 
+
+# the endpoint to get the pr-curve data
 @app.route("/prcurve", methods=['GET'])
 def get_prcurve():
     return jsonify(results['prcurve'])
+
+# the endpoint to get the prediction and probability of success for a given chemical reaction
 
 @app.route("/predict", methods=['POST'])
 def predict():
